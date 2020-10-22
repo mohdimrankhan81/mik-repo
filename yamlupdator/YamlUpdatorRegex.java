@@ -2,6 +2,7 @@ package yamlupdator;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -18,18 +19,54 @@ public class YamlUpdatorRegex {
 	}
 
 	private boolean updateYaml(String[] args) throws IOException {
-		//String fileName = "c:\\temp\\env-descriptor.yaml";
-		//String fileName = "c:\\my-projs\\autoadoption\\yamlupdator\\src\\main\\resources\\test.yaml";
-		validateArguments(args);
-		String fileName = args[0];
-		String outFileName = ".\\temp.yaml";
+		validateArguments(args);		
+		String tempFileName = ".\\temp.yaml";
 		
-		Map<String, String> newPropertyMap = extractProperties(args); 
-				//new HashMap<>();
-		//newPropertyMap.put("account-management-subdomain-release", "0.37.47");
+		generateUpdatedTempFile(args, tempFileName);
+		copyTempFileToExistingFile(args, tempFileName);
+		deleteTempFile(tempFileName);
+		return false;
+	}
+	
+	
+
+	private void deleteTempFile(String tempFileName) {
+		File f = new File(tempFileName);
+		f.delete();
+		
+	}
+
+	private void copyTempFileToExistingFile(String[] args, String tempFileName) throws IOException {
+		String fileName = args[0];
+		FileReader fr = new FileReader(tempFileName);
+		FileWriter fw = new FileWriter(fileName);
+		
+		BufferedReader br = new BufferedReader(fr);
+		BufferedWriter bw = new BufferedWriter(fw);
+		
+		Stream<String> x = br.lines();
+		x.forEach(s-> {
+			try {
+				bw.write(s);
+				bw.newLine();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} 
+		});
+		
+		br.close();
+		bw.close();
+		fr.close();
+		fw.close();		
+	}
+
+	private void generateUpdatedTempFile(String[] args, String tempFileName) throws IOException {
+		String fileName = args[0];
+		Map<String, String> newPropertyMap = extractProperties(args);
 		
 		FileReader fr = new FileReader(fileName);
-		FileWriter fw = new FileWriter(outFileName);
+		FileWriter fw = new FileWriter(tempFileName);
 		
 		BufferedReader br = new BufferedReader(fr);
 		BufferedWriter bw = new BufferedWriter(fw);
@@ -50,10 +87,7 @@ public class YamlUpdatorRegex {
 		bw.close();
 		fr.close();
 		fw.close();
-		return false;
 	}
-	
-	
 
 	private void validateArguments(String[] args) {
 		if(args == null || args.length < 2) {
