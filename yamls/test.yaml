@@ -7,6 +7,6 @@ spec:
   selector:
     app: test-services
   ports:
-  - port: 9999
-    targetPort: 1111
+  - port: 2222
+    targetPort: 9812
   type: LoadBalancer
